@@ -1,0 +1,284 @@
+@import '@fontsource-variable/onest';
+
+/* Molly world: graphite on pale cool stone, mole-soil data inks, one pink (Molly's nose). */
+:root {
+  --ground: #f2f3f1;
+  --raise: #fbfbfa;
+  --ink: #1d2120;
+  --ink-2: #565d5a;
+  --ink-3: #666d6a;
+  --line: #d9dcd8;
+  --line-2: #e6e8e5;
+
+  /* Data inks, darkest = biggest site. */
+  --soil-1: #3b3431;
+  --soil-2: #84796f;
+  --soil-3: #bfb5aa;
+  --soil-x: #dcdad5;
+  /* Text on each soil ink. */
+  --on-soil-1: #f2f3f1;
+  --on-soil-2: #fbfbfa;
+  --on-soil-3: #1d2120;
+  --on-soil-x: #1d2120;
+
+  --nose: #e0507a;
+  --nose-ink: #b42857; /* pink for text on light ground (AA) */
+  --on-nose: #1d2120;
+
+  --fur: #3b3431;
+  --fur-2: #5b504b;
+  --paw: #eaa3b2;
+  --wire: #e9e3dc;
+
+  --radius: 10px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: light;
+}
+
+/* Dark: follows the system unless the user picked a theme in Settings (data-theme on <html>). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #141716;
+    --raise: #1b1f1d;
+    --ink: #e7eae8;
+    --ink-2: #a3aaa6;
+    --ink-3: #7d8581;
+    --line: #2c312f;
+    --line-2: #222725;
+
+    --soil-1: #e6dcd2;
+    --soil-2: #a8998c;
+    --soil-3: #6c625a;
+    --soil-x: #4a4f4d;
+    --on-soil-1: #141716;
+    --on-soil-2: #141716;
+    --on-soil-3: #e7eae8;
+    --on-soil-x: #e7eae8;
+
+    --nose: #f06a8f;
+    --nose-ink: #f58aa8;
+    --on-nose: #1d2120;
+
+    --fur: #6b5d56;
+    --fur-2: #85766d;
+    --paw: #e494a5;
+    --wire: #efe7df;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --ground: #141716;
+  --raise: #1b1f1d;
+  --ink: #e7eae8;
+  --ink-2: #a3aaa6;
+  --ink-3: #7d8581;
+  --line: #2c312f;
+  --line-2: #222725;
+
+  --soil-1: #e6dcd2;
+  --soil-2: #a8998c;
+  --soil-3: #6c625a;
+  --soil-x: #4a4f4d;
+  --on-soil-1: #141716;
+  --on-soil-2: #141716;
+  --on-soil-3: #e7eae8;
+  --on-soil-x: #e7eae8;
+
+  --nose: #f06a8f;
+  --nose-ink: #f58aa8;
+  --on-nose: #1d2120;
+
+  --fur: #6b5d56;
+  --fur-2: #85766d;
+  --paw: #e494a5;
+  --wire: #efe7df;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 15px/1.45 'Onest Variable', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--nose);
+  color: var(--on-nose);
+}
+
+:focus-visible {
+  outline: 2px solid var(--nose);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--nose);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raise);
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.btn:hover {
+  border-color: var(--ink-3);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+.btn-primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+.btn-primary:hover {
+  border-color: var(--ink);
+  background: var(--soil-1);
+}
+.btn-quiet {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.btn-quiet:hover {
+  color: var(--ink);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+.field > span {
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+.input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raise);
+  transition: border-color 0.15s;
+}
+.input:hover {
+  border-color: var(--ink-3);
+}
+.input::placeholder {
+  color: var(--ink-3);
+}
+.input:focus-visible {
+  outline-offset: 0;
+  border-color: var(--nose);
+}
+
+.muted {
+  color: var(--ink-2);
+}
+.over {
+  color: var(--nose-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Site marks: brand glyphs in ink; favicons desaturated so they sit in the same voice. */
+.site-icon {
+  flex: none;
+  color: var(--ink);
+}
+.site-icon.favicon {
+  border-radius: 4px;
+  filter: grayscale(1) contrast(1.1);
+  opacity: 0.85;
+}
+
+/* Chip: a small choice button (quick limits, presets). */
+.chip {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raise);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.chip:hover {
+  border-color: var(--nose);
+}
+.chip:active {
+  transform: translateY(1px);
+}

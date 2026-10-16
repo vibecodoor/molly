@@ -1,0 +1,180 @@
+html,
+body,
+#root {
+  height: 100%;
+}
+/* Transparent over the live site; same colour scheme as the iframe element, or Chrome paints it opaque. */
+:root {
+  color-scheme: normal !important;
+}
+html,
+body {
+  background: transparent;
+}
+body {
+  overflow: hidden;
+}
+
+.blocked {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(to top, color-mix(in srgb, var(--ground) 92%, transparent) 0%, color-mix(in srgb, var(--ground) 55%, transparent) 45%, color-mix(in srgb, var(--ground) 20%, transparent) 100%);
+}
+
+/* Barrier tape. */
+.tape {
+  position: absolute;
+  z-index: -1;
+  left: -20vw;
+  width: 140vw;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--nose);
+  color: var(--on-nose);
+  box-shadow: 0 10px 24px -10px rgb(29 33 32 / 0.45);
+}
+/* Strung by hand: three tapes at uneven angles, crossing and lying over each other. */
+.tape-a {
+  top: 20%;
+  transform: rotate(-11deg);
+}
+.tape-b {
+  top: 30%;
+  transform: rotate(8deg);
+}
+.tape-c {
+  top: 47%;
+  transform: rotate(-3.5deg);
+}
+.blocked.enter .tape {
+  animation: stretch 0.9s var(--ease-out) both;
+}
+.blocked.enter .tape-b {
+  animation-delay: 0.12s;
+}
+.blocked.enter .tape-c {
+  animation-delay: 0.24s;
+}
+@keyframes stretch {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.tape-track {
+  display: flex;
+  width: max-content;
+  animation: drift 60s linear infinite;
+}
+.tape-track.reverse {
+  animation-direction: reverse;
+}
+@keyframes drift {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.tape-run {
+  display: flex;
+}
+.tape-run > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 28px;
+  padding-right: 28px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tape-run i {
+  width: 9px;
+  height: 9px;
+  background: currentColor;
+  opacity: 0.55;
+  transform: rotate(45deg);
+}
+
+/* Molly's note. No card: the scrim carries it. */
+/* Molly climbs out of the bottom edge of the screen. */
+.ground-molly {
+  position: absolute;
+  left: clamp(16px, 6vw, 96px);
+  bottom: 0;
+}
+/* Entrance plays once: an overlay re-attached after the site removed it comes back already in place. */
+.blocked.enter .ground-molly {
+  animation: rise 0.9s 0.25s var(--ease-out) both;
+}
+@keyframes rise {
+  from {
+    transform: translateY(60%);
+  }
+}
+.note {
+  position: absolute;
+  left: calc(clamp(16px, 6vw, 96px) + 168px + 32px);
+  right: 24px;
+  bottom: clamp(32px, 8vh, 88px);
+  max-width: 860px;
+}
+.note-text {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 6px;
+}
+.note h1 {
+  font-size: clamp(30px, 4.2vw, 52px);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+.countdown {
+  font-size: 18px;
+  color: var(--ink-2);
+}
+.countdown strong {
+  color: var(--nose-ink);
+  font-weight: 650;
+}
+.history-link {
+  justify-self: start;
+  margin-top: 8px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.history-link:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .ground-molly {
+    width: 104px;
+    height: 104px;
+  }
+  .note {
+    left: 20px;
+    bottom: 128px;
+  }
+  .tape {
+    height: 46px;
+  }
+  .tape-run > span {
+    font-size: 14px;
+  }
+}

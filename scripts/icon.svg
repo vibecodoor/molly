@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Extension icon: Molly (src/ui/Molly.tsx, light palette) rising from the bottom of a stone tile.
+       Regenerate the PNGs with `node scripts/icons.mjs`. -->
+  <defs><clipPath id="tile"><rect width="120" height="120" rx="26"/></clipPath></defs>
+  <g clip-path="url(#tile)">
+    <rect width="120" height="120" fill="#f2f3f1"/>
+    <g transform="translate(-6 -6) scale(1.1)">
+      <path d="M8 120 C8 74 28 34 60 34 C92 34 112 74 112 120 Z" fill="#3b3431"/>
+      <path d="M32 54 C39 44 48 39 59 38" fill="none" stroke="#5b504b" stroke-width="3" stroke-linecap="round"/>
+      <g fill="none" stroke="#e9e3dc" stroke-width="2.6">
+        <circle cx="46" cy="58" r="9.5"/>
+        <circle cx="74" cy="58" r="9.5"/>
+        <path d="M55.5 57 q4.5 -2.6 9 0"/>
+      </g>
+      <circle cx="46" cy="58" r="2.4" fill="#e9e3dc"/>
+      <circle cx="74" cy="58" r="2.4" fill="#e9e3dc"/>
+      <ellipse cx="60" cy="79" rx="15" ry="11.5" fill="#5b504b"/>
+      <ellipse cx="60" cy="73.5" rx="8" ry="6" fill="#e0507a"/>
+      <g fill="#eaa3b2">
+        <path d="M22 120 c0 -9 7 -14 14 -14 s13 5 13 14 Z"/>
+        <path d="M71 120 c0 -9 6 -14 13 -14 s14 5 14 14 Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

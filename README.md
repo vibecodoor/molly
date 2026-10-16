@@ -1,0 +1,128 @@
+<p align="center">
+  <img src="public/icon/128.png" width="96" alt="Molly the mole">
+</p>
+<h1 align="center">Molly</h1>
+<p align="center">
+  A Chrome extension that counts your time on each site and fences it off when the daily limit runs out.
+</p>
+<p align="center">
+  <a href="https://github.com/vibecodoor/molly/releases/latest"><b>Download</b></a> ·
+  <a href="#install">Install</a> ·
+  <a href="#how-it-counts">How it counts</a> ·
+  <a href="#build-from-source">Build from source</a>
+</p>
+<p align="center">
+  <a href="https://github.com/vibecodoor/molly/releases/latest"><img src="https://img.shields.io/github/v/release/vibecodoor/molly?style=flat-square&color=e0507a" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-3b3431?style=flat-square" alt="Chrome Manifest V3">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/vibecodoor/molly?style=flat-square&color=3b3431" alt="MIT license"></a>
+</p>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/blocked-dark.webp">
+  <img src="docs/images/blocked.webp" alt="Twitch blurred under pink barrier tape: Molly fenced off Twitch until tomorrow, opens in 7 h 16 min">
+</picture>
+
+When a site's limit runs out, Molly doesn't swap the page for a dull "blocked" screen. The site stays loaded but sits behind frosted glass and barrier tape, sound and video pause, and a countdown shows when it opens again. There is no "just five more minutes" button.
+
+- **Honest numbers.** Time counts only while a site is the active tab in its window, so a tab left open in the background doesn't count.
+- **Limits that stick.** Lowering a limit works right away. Raising or removing one waits until tomorrow, so you can't negotiate with yourself mid-video.
+- **A week at a glance.** Daily bars, a ranked list of sites, how often each limit ran out, plus CSV export and JSON backups.
+- **Private by design.** No account, no servers, no analytics. Everything stays in `chrome.storage` on your machine.
+
+<table>
+  <tr>
+    <td width="32%" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/popup-dark.webp">
+        <img src="docs/images/popup.webp" alt="Toolbar popup: today's time per site and time left on each limit">
+      </picture>
+      <p align="center"><sub>The popup: today so far and what's left</sub></p>
+    </td>
+    <td width="68%" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/history-dark.webp">
+        <img src="docs/images/history.webp" alt="History page: stacked daily bars for the week and sites ranked by time">
+      </picture>
+      <p align="center"><sub>History: where the week went</sub></p>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/limits-dark.webp">
+        <img src="docs/images/limits.webp" alt="Limits page: one-click presets for popular sites and a list of daily limits">
+      </picture>
+      <p align="center"><sub>Limits: 12 one-click presets, or any site</sub></p>
+    </td>
+  </tr>
+</table>
+
+Light and dark themes follow your system (or pick one in Settings). The interface is in English and Russian.
+
+## Install
+
+Molly isn't on the Chrome Web Store, so you install it from a release zip. It takes about a minute.
+
+1. Download `molly-<version>-chrome.zip` from the [latest release](https://github.com/vibecodoor/molly/releases/latest).
+2. **Extract it** to a folder you'll keep, for example `Documents\Molly`. Chrome loads the extension from this folder every time it starts, so don't delete or move it.
+3. Open `chrome://extensions`.
+4. Turn on **Developer mode** (top-right corner).
+5. Click **Load unpacked** and select the extracted folder (the one with `manifest.json` directly inside).
+6. Click the puzzle icon in the toolbar and pin Molly.
+
+Works in Chromium-based browsers too: Edge (`edge://extensions`, Developer mode is in the left sidebar), Brave (`brave://extensions`) and others.
+
+> [!IMPORTANT]
+> Chrome may ask you to "Disable developer mode extensions" when it starts. Close the prompt instead of clicking Disable, or Molly stops counting until you turn it back on.
+
+### Update
+
+1. Download the new zip and extract it **over the same folder**, replacing the files.
+2. On `chrome://extensions`, click the reload icon on Molly's card.
+
+Your history and limits stay. Don't click **Remove**: removing the extension deletes its data. If you ever need to, save a backup first (Settings → **Save backup**) and restore it afterwards.
+
+<details>
+<summary><b>Troubleshooting</b></summary>
+
+- **"Manifest file is missing or unreadable".** You picked the zip or the wrong folder. Extract the zip and select the folder that has `manifest.json` directly inside.
+- **Molly disappeared or shows an error after a while.** The folder was moved or deleted. Put it back, or extract the zip again and load it.
+- **Molly is turned off after a Chrome restart.** You clicked Disable on the developer-mode prompt. Turn it back on in `chrome://extensions`.
+- **Time isn't counted in Incognito.** Open Molly's card → Details → turn on **Allow in Incognito**.
+- **Dragging the zip onto the extensions page does nothing.** That's expected. Extract it and use Load unpacked.
+
+</details>
+
+## How it counts
+
+- A site's time counts while its tab is the active tab in any window, even if the window is in the background or minimized. One site open in two windows counts once.
+- Counting pauses while the screen is locked. A sleeping laptop adds no time.
+- A limit covers subdomains and the same name on other domains: limiting `youtube.com` also covers `m.youtube.com` and `youtube.de`.
+- Days run from local midnight to midnight. That's when blocks lift and pending limit raises take effect.
+- No time is counted on a site while it's blocked.
+
+> [!NOTE]
+> Molly makes no network requests. The font and icons are bundled, and blocked sites only load their own page under the overlay. The only way past a block is to turn off the extension, and that's by design.
+
+## Build from source
+
+Requires Node.js 22+ and Chrome.
+
+```bash
+git clone https://github.com/vibecodoor/molly.git
+cd molly
+npm install
+npm run build
+```
+
+Then load `.output/chrome-mv3` with **Load unpacked**, as above.
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev build with hot reload ([WXT](https://wxt.dev)) |
+| `npm test` | Unit tests for the counting engine (Vitest) |
+| `npm run smoke` | End-to-end run in a throwaway Chrome profile |
+| `npm run shots` | Regenerates the README screenshots in `docs/images/` |
+| `npx wxt zip` | Builds the release zip into `.output/` |
+
+The counting engine in `src/core/` is plain TypeScript with no browser APIs, which keeps it easy to test. The UI is React with plain CSS. Pushing a `v*` tag builds the zip and attaches it to a GitHub release.
+
+## License
+
+[MIT](LICENSE). Brand icons come from [Simple Icons](https://simpleicons.org) (CC0).

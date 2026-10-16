@@ -1,0 +1,12 @@
+node_modules/
+.output/
+.wxt/
+*.log
+
+# Local dev memory and design working files (not part of the public repo)
+devkit/
+.impeccable/
+CLAUDE.md
+AGENTS.md
+PRODUCT.md
+DESIGN.md
