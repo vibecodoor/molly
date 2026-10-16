@@ -49,9 +49,10 @@ body { width: 380px; }
 @keyframes settle { from { opacity: 0; transform: translateY(-8px); } }
 .layer { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0 12px; border: 0; font: inherit; font-size: 14px; text-align: left; cursor: pointer; transition: filter 0.15s; }
 .layer:hover { filter: brightness(1.08); }
-/* Marks take the layer's ink; favicons keep their colors on a light plate so any brand reads on any soil. */
+/* Marks take the layer's ink. Favicons sit on a ground-colored plate: sites serve a favicon for the system theme
+   (GitHub, ChatGPT go white in dark), and the ground follows the same theme, so the mark always contrasts. */
 .layer .site-icon { color: inherit; }
-.layer .site-icon.favicon { padding: 2px; border-radius: 5px; background: #fbfbfa; filter: none; opacity: 1; }
+.layer .site-icon.favicon { padding: 2px; border-radius: 5px; background: var(--ground); filter: none; opacity: 1; }
 .layer-name { flex: 1; min-width: 0; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .layer-time { display: inline-flex; gap: 8px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .layer-share { opacity: 0; transition: opacity 0.15s; }
