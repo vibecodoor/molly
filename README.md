@@ -8,8 +8,7 @@
 <p align="center">
   <a href="https://github.com/vibecodoor/molly/releases/latest"><b>Download</b></a> ·
   <a href="#install">Install</a> ·
-  <a href="#how-it-counts">How it counts</a> ·
-  <a href="#build-from-source">Build from source</a>
+  <a href="#how-it-counts">How it counts</a>
 </p>
 <p align="center">
   <a href="https://github.com/vibecodoor/molly/releases/latest"><img src="https://img.shields.io/github/v/release/vibecodoor/molly?style=flat-square&color=e0507a" alt="Latest release"></a>
@@ -107,29 +106,6 @@ Your history and limits stay. Don't click **Remove**: removing the extension del
 
 > [!NOTE]
 > Molly makes no network requests. The font and icons are bundled, and blocked sites only load their own page under the overlay. The only way past a block is to turn off the extension, and that's by design.
-
-## Build from source
-
-Requires Node.js 22+ and Chrome.
-
-```bash
-git clone https://github.com/vibecodoor/molly.git
-cd molly
-npm install
-npm run build
-```
-
-Then load `.output/chrome-mv3` with **Load unpacked**, as above.
-
-| Command | What it does |
-|---|---|
-| `npm run dev` | Dev build with hot reload ([WXT](https://wxt.dev)) |
-| `npm test` | Unit tests for the counting engine (Vitest) |
-| `npm run smoke` | End-to-end run in a throwaway Chrome profile |
-| `npm run shots` | Regenerates the README screenshots in `docs/images/` |
-| `npx wxt zip` | Builds the release zip into `.output/` |
-
-The counting engine in `src/core/` is plain TypeScript with no browser APIs, which keeps it easy to test. The UI is React with plain CSS. Pushing a `v*` tag builds the zip and attaches it to a GitHub release.
 
 ## License
 
