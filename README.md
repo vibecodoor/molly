@@ -29,29 +29,28 @@ When a site's limit runs out, Molly doesn't swap the page for a dull "blocked" s
 - **A week at a glance.** Daily bars, a ranked list of sites, how often each limit ran out, plus CSV export and JSON backups.
 - **Private by design.** No account, no servers, no analytics. Everything stays in `chrome.storage` on your machine.
 
-<table>
-  <tr>
-    <td width="32%" valign="top">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/images/popup-dark.webp">
-        <img src="docs/images/popup.webp" alt="Toolbar popup: today's time per site and time left on each limit">
-      </picture>
-      <p align="center"><sub>The popup: today so far and what's left</sub></p>
-    </td>
-    <td width="68%" valign="top">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/images/history-dark.webp">
-        <img src="docs/images/history.webp" alt="History page: stacked daily bars for the week and sites ranked by time">
-      </picture>
-      <p align="center"><sub>History: where the week went</sub></p>
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/images/limits-dark.webp">
-        <img src="docs/images/limits.webp" alt="Limits page: one-click presets for popular sites and a list of daily limits">
-      </picture>
-      <p align="center"><sub>Limits: 12 one-click presets, or any site</sub></p>
-    </td>
-  </tr>
-</table>
+### History: where the week went
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/history-dark.webp">
+  <img src="docs/images/history.webp" alt="History page: stacked daily bars for the week and sites ranked by time">
+</picture>
+
+### The popup: today so far and what's left
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/popup-dark.webp">
+    <img src="docs/images/popup.webp" width="420" alt="Toolbar popup: today's time per site and time left on each limit">
+  </picture>
+</p>
+
+### Limits: 12 one-click presets, or any site
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/limits-dark.webp">
+  <img src="docs/images/limits.webp" alt="Limits page: one-click presets for popular sites and a list of daily limits">
+</picture>
 
 Light and dark themes follow your system (or pick one in Settings). The interface is in English and Russian.
 
