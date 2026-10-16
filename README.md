@@ -46,6 +46,27 @@ There's a dark theme too: it follows your system, or pick one in Settings. The i
 
 Molly isn't on the Chrome Web Store, so you install it from a release zip. It takes about a minute.
 
+### With an AI agent
+
+Paste this into Claude Code, Codex, Hermes or any agent that can run commands on your computer:
+
+```text
+Install the Molly Chrome extension from https://github.com/vibecodoor/molly.
+1. Download the molly-*-chrome.zip asset of the latest release
+   (https://api.github.com/repos/vibecodoor/molly/releases/latest).
+2. Extract it into a permanent folder: ~/Extensions/molly
+   (Windows: %USERPROFILE%\Extensions\molly). If Molly is already there,
+   overwrite its files in place. Never delete the folder: Chrome loads from it.
+3. Check that manifest.json sits directly in that folder.
+4. Open chrome://extensions and tell me the clicks: turn on Developer mode,
+   Load unpacked, pick that folder. If it's an update, click the reload icon
+   on Molly's card instead.
+```
+
+The agent does the download and unpacking. The last two clicks are yours: Chrome doesn't let programs install an unpacked extension on their own.
+
+### By hand
+
 1. Download `molly-<version>-chrome.zip` from the [latest release](https://github.com/vibecodoor/molly/releases/latest).
 2. **Extract it** to a folder you'll keep, for example `Documents\Molly`. Chrome loads the extension from this folder every time it starts, so don't delete or move it.
 3. Open `chrome://extensions`.
