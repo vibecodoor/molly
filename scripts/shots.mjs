@@ -1,5 +1,5 @@
 // README screenshots. Run after `npm run build`:  npm run shots
-// Fresh Chrome profile, English UI, a synthetic week on real sites (no real history is read), Twitch over its
+// Fresh Chrome profile, English UI, light theme, a synthetic week on real sites (no real history is read), Twitch over its
 // limit so the live blurred overlay shows on the real page (needs network). Raw captures are framed
 // (window chrome, rounded corners, shadow on transparent padding) and saved as WebP to docs/images/.
 import { mkdirSync } from 'node:fs';
@@ -83,7 +83,8 @@ try {
   const page = (await cdp('Target.attachToTarget', { targetId, flatten: true })).sessionId;
   await cdp('Emulation.setScrollbarsHidden', { hidden: true }, page);
   const opt = `${ext}/options.html`;
-  for (const dark of [false, true]) {
+  // Light only: it reads as the default look on both GitHub themes. Add `true` to render *-dark variants too.
+  for (const dark of [false]) {
     const s = dark ? '-dark' : '';
     await capture(page, `popup${s}`, { url: `${ext}/popup.html`, w: 380, h: 560, dark });
     await capture(page, `history${s}`, { url: `${opt}#history`, w: 1280, h: 800, dark });
@@ -93,12 +94,11 @@ try {
   await cdp('Emulation.setScrollbarsHidden', { hidden: true }, site);
   await cdp('Page.bringToFront', {}, site); // hidden tabs don't play the tape / Molly entrance
   await capture(site, 'blocked', { w: 1280, h: 800, dark: false, wait: 9000 });
-  await capture(site, 'blocked-dark', { w: 1280, h: 800, dark: true, wait: 2500 });
 
   await cdp('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } }, page);
   await cdp('Page.navigate', { url: 'about:blank' }, page);
   await cdp('Emulation.setDeviceMetricsOverride', { width: 1500, height: 1000, deviceScaleFactor: 2, mobile: false }, page);
-  for (const dark of [false, true]) {
+  for (const dark of [false]) {
     const s = dark ? '-dark' : '';
     await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }] }, page);
     await frame(page, `popup${s}`, `popup${s}`, { w: 380, h: 560, dark, popup: true });

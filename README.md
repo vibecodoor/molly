@@ -17,10 +17,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/vibecodoor/molly?style=flat-square&color=3b3431" alt="MIT license"></a>
 </p>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/blocked-dark.webp">
-  <img src="docs/images/blocked.webp" alt="Twitch blurred under pink barrier tape: Molly fenced off Twitch until tomorrow, opens in 7 h 16 min">
-</picture>
+<img src="docs/images/blocked.webp" alt="Twitch blurred under pink barrier tape: Molly fenced off Twitch until tomorrow, opens in 7 h 16 min">
 
 When a site's limit runs out, Molly doesn't swap the page for a dull "blocked" screen. The site stays loaded but sits behind frosted glass and barrier tape, sound and video pause, and a countdown shows when it opens again. There is no "just five more minutes" button.
 
@@ -31,28 +28,19 @@ When a site's limit runs out, Molly doesn't swap the page for a dull "blocked" s
 
 ### History: where the week went
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/history-dark.webp">
-  <img src="docs/images/history.webp" alt="History page: stacked daily bars for the week and sites ranked by time">
-</picture>
+<img src="docs/images/history.webp" alt="History page: stacked daily bars for the week and sites ranked by time">
 
 ### The popup: today so far and what's left
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/popup-dark.webp">
-    <img src="docs/images/popup.webp" width="420" alt="Toolbar popup: today's time per site and time left on each limit">
-  </picture>
+  <img src="docs/images/popup.webp" width="420" alt="Toolbar popup: today's time per site and time left on each limit">
 </p>
 
 ### Limits: 12 one-click presets, or any site
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/limits-dark.webp">
-  <img src="docs/images/limits.webp" alt="Limits page: one-click presets for popular sites and a list of daily limits">
-</picture>
+<img src="docs/images/limits.webp" alt="Limits page: one-click presets for popular sites and a list of daily limits">
 
-Light and dark themes follow your system (or pick one in Settings). The interface is in English and Russian.
+There's a dark theme too: it follows your system, or pick one in Settings. The interface is in English and Russian.
 
 ## Install
 
