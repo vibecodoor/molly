@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <title>Molly</title>
   <!-- Extension icon: Molly (src/ui/Molly.tsx, light palette) rising from the bottom of a stone tile.
        Regenerate the PNGs with `node scripts/icons.mjs`. -->
   <defs><clipPath id="tile"><rect width="120" height="120" rx="26"/></clipPath></defs>

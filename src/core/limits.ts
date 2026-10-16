@@ -9,6 +9,8 @@ export interface LimitConfig {
   pending: Record<string, { limit: number | null; effectiveFrom: string }>;
 }
 
+export const EMPTY_CONFIG: LimitConfig = { limits: {}, pending: {} };
+
 /** Tightening (incl. a brand-new limit) applies now; raising or removing applies from tomorrow. */
 export function changeLimit(cfg: LimitConfig, domain: string, limit: number | null, today: string): LimitConfig {
   const { [domain]: _, ...pending } = cfg.pending;
@@ -44,7 +46,8 @@ export function underLimit(host: string, limit: string): boolean {
 }
 
 /** The limited domain a site's time belongs to (itself when no limit covers it). */
-export const limitFor = (domain: string, limits: Limits) => Object.keys(limits).find((l) => underLimit(domain, l)) ?? domain;
+export const limitFor = (domain: string, limits: Limits) =>
+  Object.keys(limits).find((l) => underLimit(domain, l)) ?? domain;
 
 export function blockedDomains(today: Record<string, number>, limits: Limits): string[] {
   return Object.entries(limits)

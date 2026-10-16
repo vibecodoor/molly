@@ -14,7 +14,14 @@ const M = 60_000;
 
 // Synthetic week, Monday first. Today always gets the last entry (Twitch at its limit); later days are dropped.
 const WEEK = [
-  { 'youtube.com': 96 * M, 'discord.com': 44 * M, 'twitch.tv': 34 * M, 'reddit.com': 27 * M, 'x.com': 14 * M, 'telegram.org': 11 * M },
+  {
+    'youtube.com': 96 * M,
+    'discord.com': 44 * M,
+    'twitch.tv': 34 * M,
+    'reddit.com': 27 * M,
+    'x.com': 14 * M,
+    'telegram.org': 11 * M,
+  },
   { 'youtube.com': 58 * M, 'discord.com': 52 * M, 'reddit.com': 19 * M, 'x.com': 22 * M, 'netflix.com': 47 * M },
   { 'youtube.com': 60 * M, 'twitch.tv': 30 * M, 'discord.com': 31 * M, 'reddit.com': 20 * M, 'instagram.com': 18 * M },
   { 'youtube.com': 41 * M, 'discord.com': 38 * M, 'twitch.tv': 12 * M, 'telegram.org': 23 * M, 'x.com': 9 * M },
@@ -27,8 +34,16 @@ const LIMITS = { 'youtube.com': 60 * M, 'twitch.tv': 30 * M, 'reddit.com': 20 * 
 let ext;
 const raw = {}; // name -> PNG base64
 async function capture(sessionId, name, { url, w, h, dark, wait = 2200 }) {
-  await cdp('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 2, mobile: false }, sessionId);
-  await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }] }, sessionId);
+  await cdp(
+    'Emulation.setDeviceMetricsOverride',
+    { width: w, height: h, deviceScaleFactor: 2, mobile: false },
+    sessionId,
+  );
+  await cdp(
+    'Emulation.setEmulatedMedia',
+    { features: [{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }] },
+    sessionId,
+  );
   if (url) await cdp('Page.navigate', { url }, sessionId);
   await sleep(wait);
   raw[name] = (await cdp('Page.captureScreenshot', { format: 'png' }, sessionId)).data;
@@ -49,12 +64,21 @@ const FRAME_CSS = (dark) => `
 
 /** Puts a raw capture in a window frame (or a bare card for the popup) and saves it as WebP. */
 async function frame(page, name, rawName, { w, h, url, dark, popup }) {
-  const bar = popup ? '' : `<div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><div class="url">${url}</div></div>`;
+  const bar = popup
+    ? ''
+    : `<div class="bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><div class="url">${url}</div></div>`;
   const html = `<style>${FRAME_CSS(dark)}</style><div class="pad"><div class="win">${bar}
     <img src="data:image/png;base64,${raw[rawName]}" width="${w}" height="${h}"></div></div>`;
-  await cdp('Page.setDocumentContent', { frameId: (await cdp('Page.getFrameTree', {}, page)).frameTree.frame.id, html }, page);
+  await cdp(
+    'Page.setDocumentContent',
+    { frameId: (await cdp('Page.getFrameTree', {}, page)).frameTree.frame.id, html },
+    page,
+  );
   await sleep(400);
-  const box = await evaluate(page, `(() => { const r = document.querySelector('.pad').getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; })()`);
+  const box = await evaluate(
+    page,
+    `(() => { const r = document.querySelector('.pad').getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; })()`,
+  );
   await shot(page, resolve(OUT, `${name}.webp`), { format: 'webp', quality: 92, clip: { ...box, scale: 1 } });
 }
 
@@ -62,7 +86,9 @@ try {
   const { id } = await cdp('Extensions.loadUnpacked', { path: EXT });
   ext = `chrome-extension://${id}`;
   const sw = await attach((t) => t.type === 'service_worker' && t.url.startsWith(`${ext}/`));
-  await evaluate(sw, `(async () => {
+  await evaluate(
+    sw,
+    `(async () => {
     const key = (d) => [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
     const now = new Date();
     const week = ${JSON.stringify(WEEK)};
@@ -76,7 +102,8 @@ try {
     }
     await chrome.storage.local.set(data);
     await chrome.windows.create({ url: 'https://www.twitch.tv/', state: 'normal', width: 1280, height: 800 });
-  })()`);
+  })()`,
+  );
   await cdp('Target.detachFromTarget', { sessionId: sw });
 
   const { targetId } = await cdp('Target.createTarget', { url: 'about:blank', newWindow: true });
@@ -97,10 +124,18 @@ try {
 
   await cdp('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } }, page);
   await cdp('Page.navigate', { url: 'about:blank' }, page);
-  await cdp('Emulation.setDeviceMetricsOverride', { width: 1500, height: 1000, deviceScaleFactor: 2, mobile: false }, page);
+  await cdp(
+    'Emulation.setDeviceMetricsOverride',
+    { width: 1500, height: 1000, deviceScaleFactor: 2, mobile: false },
+    page,
+  );
   for (const dark of [false]) {
     const s = dark ? '-dark' : '';
-    await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }] }, page);
+    await cdp(
+      'Emulation.setEmulatedMedia',
+      { features: [{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }] },
+      page,
+    );
     await frame(page, `popup${s}`, `popup${s}`, { w: 380, h: 560, dark, popup: true });
     await frame(page, `history${s}`, `history${s}`, { w: 1280, h: 800, url: 'Molly · History', dark });
     await frame(page, `limits${s}`, `limits${s}`, { w: 1280, h: 800, url: 'Molly · Limits', dark });

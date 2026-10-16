@@ -12,8 +12,15 @@ export function launch(args = []) {
   const profile = mkdtempSync(join(tmpdir(), 'molly-cdp-'));
   const chrome = spawn(
     CHROME,
-    ['--remote-debugging-pipe', '--enable-unsafe-extension-debugging', `--user-data-dir=${profile}`,
-      '--no-first-run', '--no-default-browser-check', ...args, 'about:blank'],
+    [
+      '--remote-debugging-pipe',
+      '--enable-unsafe-extension-debugging',
+      `--user-data-dir=${profile}`,
+      '--no-first-run',
+      '--no-default-browser-check',
+      ...args,
+      'about:blank',
+    ],
     { stdio: ['ignore', 'ignore', 'ignore', 'pipe', 'pipe'] },
   );
   const [, , , toChrome, fromChrome] = chrome.stdio;
@@ -59,7 +66,9 @@ export function launch(args = []) {
   async function close() {
     chrome.kill();
     await sleep(1000);
-    try { rmSync(profile, { recursive: true, force: true }); } catch {}
+    try {
+      rmSync(profile, { recursive: true, force: true });
+    } catch {}
   }
   return { cdp, attach, evaluate, shot, close };
 }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { dayKey, nextDay } from './day';
 import { domainOf } from './domain';
-import { MAX_GAP_MS, credit, settle, type Usage } from './engine';
+import { credit, MAX_GAP_MS, settle, type Usage } from './engine';
 import { formatDuration } from './format';
-import { blockedDomains, changeLimit, msUntilExhaust, rollover } from './limits';
 import { setLang } from './i18n';
+import { blockedDomains, changeLimit, msUntilExhaust, rollover } from './limits';
 
 // Expectations are written in Russian; the shipped default is English.
 setLang('ru');
@@ -73,6 +73,12 @@ describe('underLimit', () => {
     expect(underLimit('mobile.x.com', 'x.com')).toBe(true);
     expect(limitFor('pinterest.de', { 'pinterest.com': 1 })).toBe('pinterest.com');
     expect(limitFor('github.com', { 'pinterest.com': 1 })).toBe('github.com');
+  });
+  it('matches by registrable domain, so a name in a subdomain is not the site', async () => {
+    const { underLimit } = await import('./limits');
+    expect(underLimit(domainOf('https://mail.google.com/')!, 'mail.ru')).toBe(false);
+    expect(underLimit(domainOf('https://web.telegram.org/')!, 'web.de')).toBe(false);
+    expect(underLimit(domainOf('https://www.pinterest.co.uk/')!, 'pinterest.com')).toBe(true);
   });
 });
 

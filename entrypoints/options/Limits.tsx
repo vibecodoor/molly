@@ -4,11 +4,12 @@ import type { SetLimitMessage } from '../../src/adapter/reconcile';
 import { domainOf } from '../../src/core/domain';
 import { formatDuration, siteName } from '../../src/core/format';
 import { t } from '../../src/core/i18n';
-import type { LimitConfig } from '../../src/core/limits';
+import { EMPTY_CONFIG, type LimitConfig, limitFor } from '../../src/core/limits';
 import { PRESETS, SiteIcon } from '../../src/ui/SiteIcon';
 
-const MIN = 60_000;
-const QUICK = [15, 30, 60];
+export const MIN = 60_000;
+/** One-click limits in minutes, shared with the popup's quick row. */
+export const QUICK = [15, 30, 60];
 const TOP_PRESETS = 4; // in the popup the rest fold under a toggle so the view reads at a glance
 
 /** Accepts `youtube.com`, `m.youtube.com` or a full URL; returns the registrable domain. */
@@ -35,9 +36,7 @@ export function Limits({ compact = false }: { compact?: boolean }) {
   // Read-only view of storage; every write goes to the background as a message.
   useEffect(() => {
     const reload = () =>
-      void browser.storage.local
-        .get('limitConfig')
-        .then((s) => setCfg((s.limitConfig as LimitConfig) ?? { limits: {}, pending: {} }));
+      void browser.storage.local.get('limitConfig').then((s) => setCfg((s.limitConfig as LimitConfig) ?? EMPTY_CONFIG));
     reload();
     browser.storage.local.onChanged.addListener(reload);
     return () => browser.storage.local.onChanged.removeListener(reload);
@@ -48,6 +47,10 @@ export function Limits({ compact = false }: { compact?: boolean }) {
 
   async function send(domain: string, limit: number | null) {
     const current = cfg?.limits[domain];
+    const by = cfg && limitFor(domain, cfg.limits);
+    if (current === undefined && by && by !== domain) {
+      return setStatus({ text: s.covered(siteName(domain), siteName(by)), error: true });
+    }
     const res = (await browser.runtime.sendMessage({
       type: 'setLimit',
       domain,

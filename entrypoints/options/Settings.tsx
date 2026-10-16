@@ -3,7 +3,7 @@ import { browser } from 'wxt/browser';
 import type { ImportBackupMessage, SetLangMessage, SetThemeMessage } from '../../src/adapter/reconcile';
 import { dayKey } from '../../src/core/day';
 import { makeBackup, toCsv } from '../../src/core/history';
-import { type Lang, type Theme, getLang, t } from '../../src/core/i18n';
+import { getLang, type Lang, type Theme, t } from '../../src/core/i18n';
 import { useHistoryData } from './History';
 
 const THEMES: Theme[] = ['system', 'light', 'dark'];
@@ -95,7 +95,10 @@ function DataActions() {
     const f = e.target.files?.[0];
     e.target.value = '';
     if (!f) return;
-    const res = (await browser.runtime.sendMessage({ type: 'importBackup', text: await f.text() } satisfies ImportBackupMessage)) as {
+    const res = (await browser.runtime.sendMessage({
+      type: 'importBackup',
+      text: await f.text(),
+    } satisfies ImportBackupMessage)) as {
       ok: boolean;
       error?: string;
       result?: { days: number };
@@ -126,7 +129,11 @@ function DataActions() {
           disabled={!data}
           onClick={() =>
             data &&
-            download(`molly-backup-${stamp}.json`, 'application/json', JSON.stringify(makeBackup(data.days, data.cfg.limits, Date.now())))
+            download(
+              `molly-backup-${stamp}.json`,
+              'application/json',
+              JSON.stringify(makeBackup(data.days, data.cfg.limits, Date.now())),
+            )
           }
         >
           {s.backup}

@@ -1,5 +1,6 @@
 import { dayKey } from '../src/core/day';
-import { type LimitConfig, blockedDomains, underLimit } from '../src/core/limits';
+import { domainOf } from '../src/core/domain';
+import { blockedDomains, type LimitConfig, underLimit } from '../src/core/limits';
 
 /**
  * Block overlay: the site loads, Molly lays a blurred glass with the block page over it and keeps media silent.
@@ -10,8 +11,9 @@ export default defineContentScript({
   matches: ['<all_urls>'],
   runAt: 'document_start',
   main() {
-    if (!/^https?:$/.test(location.protocol)) return;
-    const host = location.hostname;
+    // The same registrable domain the background counts by: the full host would let a mail.ru limit cover mail.google.com.
+    const site = domainOf(location.href) ?? '';
+    if (!site) return;
     // Always the live <html>: some sites (SPA hydration) replace it after document_start.
     const root = () => document.documentElement;
     let frame: HTMLIFrameElement | null = null;
@@ -102,7 +104,7 @@ export default defineContentScript({
       const key = `day:${dayKey(Date.now())}`;
       const s = (await browser.storage.local.get(['limitConfig', key])) as Record<string, never>;
       const limits = (s.limitConfig as LimitConfig | undefined)?.limits ?? {};
-      const domain = blockedDomains(s[key] ?? {}, limits).find((d) => underLimit(host, d));
+      const domain = blockedDomains(s[key] ?? {}, limits).find((d) => underLimit(site, d));
       if (domain) show(domain);
       else hide();
     }

@@ -4,22 +4,20 @@ import { browser } from 'wxt/browser';
 import type { SetLimitMessage } from '../../src/adapter/reconcile';
 import { dayKey } from '../../src/core/day';
 import { domainOf } from '../../src/core/domain';
-import { type EngineState, dayTotal, settle, sites } from '../../src/core/engine';
+import { dayTotal, type EngineState, settle, sites } from '../../src/core/engine';
 import { formatDuration, siteName } from '../../src/core/format';
 import { t } from '../../src/core/i18n';
-import type { LimitConfig } from '../../src/core/limits';
+import { EMPTY_CONFIG, type LimitConfig, limitFor } from '../../src/core/limits';
+import { initLang, useLang } from '../../src/ui/lang';
 import { Molly } from '../../src/ui/Molly';
 import { SiteIcon } from '../../src/ui/SiteIcon';
-import { initLang, useLang } from '../../src/ui/lang';
 import { History, WeekStepper } from '../options/History';
-import { Limits } from '../options/Limits';
+import { Limits, MIN, QUICK } from '../options/Limits';
 import { Settings } from '../options/Settings';
 import '../options/style.css';
 import '../../src/ui/theme.css';
 import './style.css';
 
-const MIN = 60_000;
-const QUICK = [15, 30, 60];
 const LAYERS = 4; // named strata; the rest fold into one "other" layer
 
 /** Today's sites as soil strata under Molly's ground line: thicker and darker = more time. */
@@ -28,8 +26,16 @@ function Strata({ top, total, onOpen }: { top: [string, number][]; total: number
   const named = top.slice(0, LAYERS);
   const rest = top.slice(LAYERS);
   const layers: { key: string; label: string; ms: number; ink: string; domain?: string }[] = [
-    ...named.map(([domain, ms], i) => ({ key: domain, label: siteName(domain), ms, ink: i < 3 ? String(i + 1) : 'x', domain })),
-    ...(rest.length ? [{ key: 'rest', label: s.more(rest.length), ms: rest.reduce((a, [, ms]) => a + ms, 0), ink: 'x' }] : []),
+    ...named.map(([domain, ms], i) => ({
+      key: domain,
+      label: siteName(domain),
+      ms,
+      ink: i < 3 ? String(i + 1) : 'x',
+      domain,
+    })),
+    ...(rest.length
+      ? [{ key: 'rest', label: s.more(rest.length), ms: rest.reduce((a, [, ms]) => a + ms, 0), ink: 'x' }]
+      : []),
   ];
   if (!layers.length) return <p className="strata-empty muted">{s.empty}</p>;
   const max = Math.max(...layers.map((l) => l.ms));
@@ -77,7 +83,7 @@ async function load(): Promise<Snapshot> {
   ]);
   return {
     engine: s.engine,
-    cfg: s.limitConfig ?? { limits: {}, pending: {} },
+    cfg: s.limitConfig ?? EMPTY_CONFIG,
     used: s[key] ?? {},
     here: domainOf(tab?.url),
   };
@@ -100,7 +106,9 @@ function Popup() {
   const [tab, setTab] = useState<Tab>('today');
   const [anchor, setAnchor] = useState(() => dayKey(Date.now()));
   const full = () =>
-    void browser.tabs.create({ url: `${browser.runtime.getURL('/options.html')}#${tab === 'today' ? 'history' : tab}` });
+    void browser.tabs.create({
+      url: `${browser.runtime.getURL('/options.html')}#${tab === 'today' ? 'history' : tab}`,
+    });
 
   return (
     <div className={`popup popup-${tab}`}>
@@ -126,7 +134,14 @@ function Popup() {
         ))}
         <button type="button" className="expand" aria-label={t().popup.full} title={t().popup.full} onClick={full}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M9.5 2.5h4v4M13.5 2.5 8 8M6.5 3.5h-3v9h9v-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M9.5 2.5h4v4M13.5 2.5 8 8M6.5 3.5h-3v9h9v-3"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </nav>
@@ -154,7 +169,11 @@ function Today({ onHistory }: { onHistory: () => void }) {
   const used = liveUsage(snap, now);
   const limits = Object.entries(snap.cfg.limits).sort(([a], [b]) => a.localeCompare(b));
   const top = sites(used).sort(([, a], [, b]) => b - a);
-  const here = snap.here && snap.cfg.limits[snap.here] === undefined ? snap.here : null;
+  // No quick limit for a site an existing limit already covers (youtube.de under youtube.com): it would never fill.
+  const here =
+    snap.here && limitFor(snap.here, snap.cfg.limits) === snap.here && snap.cfg.limits[snap.here] === undefined
+      ? snap.here
+      : null;
 
   const limit = (domain: string, minutes: number) =>
     void browser.runtime.sendMessage({ type: 'setLimit', domain, limit: minutes * MIN } satisfies SetLimitMessage);
@@ -202,7 +221,14 @@ function Today({ onHistory }: { onHistory: () => void }) {
                   </span>
                   <span className={over ? 'over' : ''}>{over ? s.closed : s.left(formatDuration(max - spent))}</span>
                 </div>
-                <div className="bar" role="progressbar" aria-label={domain} aria-valuemin={0} aria-valuemax={max} aria-valuenow={Math.min(spent, max)}>
+                <div
+                  className="bar"
+                  role="progressbar"
+                  aria-label={domain}
+                  aria-valuemin={0}
+                  aria-valuemax={max}
+                  aria-valuenow={Math.min(spent, max)}
+                >
                   <div className={over ? 'over' : ''} style={{ width: `${Math.min(100, (spent / max) * 100)}%` }} />
                 </div>
                 <p className="sub muted">

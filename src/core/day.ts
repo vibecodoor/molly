@@ -12,7 +12,10 @@ export function nextMidnight(ms: number): number {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
 }
 
-export function nextDay(day: string): string {
+/** Local midnight of a `YYYY-MM-DD` date, `plus` days later. */
+export function dateOf(day: string, plus = 0): Date {
   const [y, m, d] = day.split('-').map(Number) as [number, number, number];
-  return dayKey(new Date(y, m - 1, d + 1).getTime());
+  return new Date(y, m - 1, d + plus);
 }
+
+export const nextDay = (day: string) => dayKey(dateOf(day, 1).getTime());

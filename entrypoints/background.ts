@@ -1,11 +1,11 @@
 import {
   IDLE_INTERVAL_S,
   type ImportBackupMessage,
-  type SetLangMessage,
-  type SetThemeMessage,
-  type SetLimitMessage,
   importBackup,
   reconcile,
+  type SetLangMessage,
+  type SetLimitMessage,
+  type SetThemeMessage,
   saveLang,
   saveTheme,
   setLimit,
@@ -36,26 +36,28 @@ export default defineBackground(() => {
   browser.idle.onStateChanged.addListener(run); // locked → paused, anything else → resumed (in reconcile)
 
   // Writes from extension pages go through the same queue, then re-apply blocks at once.
-  browser.runtime.onMessage.addListener((msg: SetLimitMessage | ImportBackupMessage | SetLangMessage | SetThemeMessage, _sender, sendResponse) => {
-    const job =
-      msg?.type === 'setLimit'
-        ? () => setLimit(msg)
-        : msg?.type === 'importBackup'
-          ? () => importBackup(msg)
-          : msg?.type === 'setLang'
-            ? () => saveLang(msg)
-            : msg?.type === 'setTheme'
-              ? () => saveTheme(msg)
-              : null;
-    if (!job) return;
-    enqueue(async () => {
-      const result = await job();
-      await reconcile();
-      return result;
-    }).then(
-      (result) => sendResponse({ ok: true, result }),
-      (e) => sendResponse({ ok: false, error: e instanceof Error ? e.message : String(e) }),
-    );
-    return true; // keep the channel open for the async response
-  });
+  browser.runtime.onMessage.addListener(
+    (msg: SetLimitMessage | ImportBackupMessage | SetLangMessage | SetThemeMessage, _sender, sendResponse) => {
+      const job =
+        msg?.type === 'setLimit'
+          ? () => setLimit(msg)
+          : msg?.type === 'importBackup'
+            ? () => importBackup(msg)
+            : msg?.type === 'setLang'
+              ? () => saveLang(msg)
+              : msg?.type === 'setTheme'
+                ? () => saveTheme(msg)
+                : null;
+      if (!job) return;
+      enqueue(async () => {
+        const result = await job();
+        await reconcile();
+        return result;
+      }).then(
+        (result) => sendResponse({ ok: true, result }),
+        (e) => sendResponse({ ok: false, error: e instanceof Error ? e.message : String(e) }),
+      );
+      return true; // keep the channel open for the async response
+    },
+  );
 });

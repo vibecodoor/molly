@@ -3,10 +3,24 @@ import { t } from '../core/i18n';
 /** Molly the mole. Flat soil fur, pink nose and paws, round wire glasses. */
 export type MollyPose = 'peek' | 'sleep';
 
-export function Molly({ pose = 'peek', size = 96, className }: { pose?: MollyPose; size?: number; className?: string }) {
+export function Molly({
+  pose = 'peek',
+  size = 96,
+  className,
+}: {
+  pose?: MollyPose;
+  size?: number;
+  className?: string;
+}) {
   const eye = (cx: number, closed: boolean) =>
     closed ? (
-      <path d={`M${cx - 3.2} 58.6 q3.2 2.6 6.4 0`} fill="none" stroke="var(--wire)" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d={`M${cx - 3.2} 58.6 q3.2 2.6 6.4 0`}
+        fill="none"
+        stroke="var(--wire)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     ) : (
       <circle cx={cx} cy={58} r="1.9" fill="var(--wire)" />
     );

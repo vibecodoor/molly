@@ -1,10 +1,18 @@
 import { browser } from 'wxt/browser';
 import { dayKey, nextMidnight } from '../core/day';
 import { domainOf } from '../core/domain';
-import { type EngineState, type Usage, settle } from '../core/engine';
+import { type EngineState, settle, type Usage } from '../core/engine';
 import { mergeDays, parseBackup, restoreLimits } from '../core/history';
-import { type Lang, type Theme, DEFAULT_LANG, isLang, isTheme, setLang } from '../core/i18n';
-import { type LimitConfig, blockedDomains, changeLimit, limitFor, msUntilExhaust, rollover } from '../core/limits';
+import { DEFAULT_LANG, isLang, isTheme, type Lang, setLang, type Theme } from '../core/i18n';
+import {
+  blockedDomains,
+  changeLimit,
+  EMPTY_CONFIG,
+  type LimitConfig,
+  limitFor,
+  msUntilExhaust,
+  rollover,
+} from '../core/limits';
 
 const TICK_MIN = 0.5; // MAX_GAP_MS in core/engine.ts assumes this 30 s tick
 export const IDLE_INTERVAL_S = 15;
@@ -27,7 +35,7 @@ export async function reconcile(now = Date.now()): Promise<void> {
   const usage: Usage = Object.fromEntries(dayKeys.map((k) => [k.slice(4), stored[k] ?? {}]));
 
   const settled = settle(prev, now, usage);
-  const cfg = rollover(limitConfig ?? { limits: {}, pending: {} }, today);
+  const cfg = rollover(limitConfig ?? EMPTY_CONFIG, today);
   const used = usage[today] ?? {};
   const blocked = blockedDomains(used, cfg.limits);
   const locked = (await browser.idle.queryState(IDLE_INTERVAL_S)) === 'locked';
@@ -42,6 +50,8 @@ export async function reconcile(now = Date.now()): Promise<void> {
   await browser.storage.local.set({
     engine: { open, since: locked ? null : (settled.since ?? now) } satisfies EngineState,
     ...Object.fromEntries(Object.entries(usage).map(([d, v]) => [`day:${d}`, v])),
+    // The limits in force today, so History judges each past day by its own limit, not today's.
+    [`limits:${today}`]: cfg.limits,
     ...(JSON.stringify(cfg) !== JSON.stringify(limitConfig) && { limitConfig: cfg }),
   });
 
@@ -62,7 +72,11 @@ export async function setLimit({ domain, limit }: SetLimitMessage, now = Date.no
   if (typeof domain !== 'string' || domainOf(`https://${domain}/`) !== domain) throw new Error(`bad domain: ${domain}`);
   if (limit !== null && !(Number.isFinite(limit) && limit > 0)) throw new Error(`bad limit: ${limit}`);
   const { limitConfig } = (await browser.storage.local.get('limitConfig')) as { limitConfig?: LimitConfig };
-  const cfg = changeLimit(limitConfig ?? { limits: {}, pending: {} }, domain, limit, dayKey(now));
+  const limits = limitConfig?.limits ?? {};
+  // Time on a covered site fills the covering limit (limitFor), so a second limit on it would never fill.
+  const by = limitFor(domain, limits);
+  if (limits[domain] === undefined && by !== domain) throw new Error(`${domain} is covered by the ${by} limit`);
+  const cfg = changeLimit(limitConfig ?? EMPTY_CONFIG, domain, limit, dayKey(now));
   await browser.storage.local.set({ limitConfig: cfg });
 }
 
@@ -74,7 +88,14 @@ async function syncBlockRules(blocked: string[]): Promise<void> {
     .map((r) => `${r.action.type}:${r.condition.requestDomains?.join()}`)
     .sort()
     .join();
-  if (have === blocked.map((d) => `block:${d}`).sort().join()) return;
+  if (
+    have ===
+    blocked
+      .map((d) => `block:${d}`)
+      .sort()
+      .join()
+  )
+    return;
   await browser.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: current.map((r) => r.id),
     addRules: blocked.map((domain, i) => ({
@@ -122,7 +143,7 @@ export async function importBackup({ text }: ImportBackupMessage, now = Date.now
   const stored = (await browser.storage.local.get([...keys, 'limitConfig'])) as Record<string, never>;
   const current = Object.fromEntries(Object.keys(backup.days).map((d) => [d, stored[`day:${d}`] ?? {}]));
   const merged = mergeDays(current, backup.days);
-  const cfg = restoreLimits(stored.limitConfig ?? { limits: {}, pending: {} }, backup.limits, dayKey(now));
+  const cfg = restoreLimits(stored.limitConfig ?? EMPTY_CONFIG, backup.limits, dayKey(now));
   await browser.storage.local.set({
     ...Object.fromEntries(Object.entries(merged).map(([d, v]) => [`day:${d}`, v])),
     limitConfig: cfg,

@@ -10,6 +10,7 @@ export default defineConfig({
     description: 'Active-tab time per site with daily hard-block limits.',
     permissions: ['storage', 'alarms', 'tabs', 'idle', 'declarativeNetRequest', 'favicon'],
     host_permissions: ['<all_urls>'],
-    web_accessible_resources: [{ resources: ['blocked.html'], matches: ['<all_urls>'] }],
+    // Dynamic URL: a site can't probe the fixed ID for blocked.html to learn Molly is installed.
+    web_accessible_resources: [{ resources: ['blocked.html'], matches: ['<all_urls>'], use_dynamic_url: true }],
   },
 });

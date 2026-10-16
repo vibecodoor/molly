@@ -1,26 +1,22 @@
-import { dayKey, nextDay } from './day';
+import { dateOf, dayKey, nextDay } from './day';
+import { domainOf } from './domain';
 import { ANY, dayTotal, sites } from './engine';
 import { t } from './i18n';
-import { domainOf } from './domain';
-import { type LimitConfig, changeLimit } from './limits';
+import { changeLimit, type LimitConfig } from './limits';
 
 /** day → domain → ms */
 export type Days = Record<string, Record<string, number>>;
 
 /** The Monday-to-Sunday week containing `day`. */
 export function weekOf(day: string): string[] {
-  const [y, m, d] = day.split('-').map(Number) as [number, number, number];
-  const date = new Date(y, m - 1, d);
-  const monday = new Date(y, m - 1, d - ((date.getDay() + 6) % 7));
-  const first = dayKey(monday.getTime());
+  const first = dayKey(dateOf(day, -((dateOf(day).getDay() + 6) % 7)).getTime());
   const week = [first];
   while (week.length < 7) week.push(nextDay(week[week.length - 1]!));
   return week;
 }
 
 export function shiftWeek(day: string, weeks: number): string {
-  const [y, m, d] = day.split('-').map(Number) as [number, number, number];
-  return dayKey(new Date(y, m - 1, d + 7 * weeks).getTime());
+  return dayKey(dateOf(day, 7 * weeks).getTime());
 }
 
 export interface Summary {

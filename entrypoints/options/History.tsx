@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { dayKey } from '../../src/core/day';
 import { sites } from '../../src/core/engine';
-import { dayShort, formatDuration, siteName, weekRange, weekdayShort } from '../../src/core/format';
+import { dayShort, formatDuration, siteName, weekdayShort, weekRange } from '../../src/core/format';
 import { type Days, shiftWeek, summarize, weekOf } from '../../src/core/history';
 import { t } from '../../src/core/i18n';
-import type { LimitConfig } from '../../src/core/limits';
+import { EMPTY_CONFIG, type LimitConfig, type Limits } from '../../src/core/limits';
 import { Molly } from '../../src/ui/Molly';
 
 const HOUR = 3_600_000;
@@ -14,13 +14,17 @@ const OTHER_INK = 'var(--soil-x)';
 const LIST_SIZE = 8;
 
 export function useHistoryData() {
-  const [data, setData] = useState<{ days: Days; cfg: LimitConfig } | null>(null);
+  const [data, setData] = useState<{ days: Days; dayLimits: Record<string, Limits>; cfg: LimitConfig } | null>(null);
   useEffect(() => {
     const reload = () =>
       void browser.storage.local.get(null).then((all) => {
         const days: Days = {};
-        for (const [k, v] of Object.entries(all)) if (k.startsWith('day:')) days[k.slice(4)] = v as Days[string];
-        setData({ days, cfg: (all.limitConfig as LimitConfig) ?? { limits: {}, pending: {} } });
+        const dayLimits: Record<string, Limits> = {};
+        for (const [k, v] of Object.entries(all)) {
+          if (k.startsWith('day:')) days[k.slice(4)] = v as Days[string];
+          else if (k.startsWith('limits:')) dayLimits[k.slice(7)] = v as Limits;
+        }
+        setData({ days, dayLimits, cfg: (all.limitConfig as LimitConfig) ?? EMPTY_CONFIG });
       });
     reload();
     browser.storage.local.onChanged.addListener(reload);
@@ -70,7 +74,9 @@ export function History({ anchor }: { anchor: string }) {
     <div className="history">
       <div className="history-main">
         <h1 className="lead">
-          {isThisWeek ? h.leadThis(formatDuration(s.total)) : h.lead(weekRange(week[0]!, week[6]!), formatDuration(s.total))}{' '}
+          {isThisWeek
+            ? h.leadThis(formatDuration(s.total))
+            : h.lead(weekRange(week[0]!, week[6]!), formatDuration(s.total))}{' '}
           <span className="muted">{h.top(siteName(top), formatDuration(topMs))}</span>
         </h1>
 
@@ -88,7 +94,10 @@ export function History({ anchor }: { anchor: string }) {
                 const usage = sites(data.days[day] ?? {}).sort(([, a], [, b]) => b - a);
                 const named = usage.filter(([d]) => ink(d) !== OTHER_INK);
                 const other = usage.filter(([d]) => ink(d) === OTHER_INK).reduce((a, [, ms]) => a + ms, 0);
-                const segs = [...named.sort(([a], [b]) => INKS.indexOf(ink(a)) - INKS.indexOf(ink(b))), ['', other] as const];
+                const segs = [
+                  ...named.sort(([a], [b]) => INKS.indexOf(ink(a)) - INKS.indexOf(ink(b))),
+                  ['', other] as const,
+                ];
                 return (
                   <button
                     type="button"
@@ -99,7 +108,10 @@ export function History({ anchor }: { anchor: string }) {
                     disabled={day > today}
                     onClick={() => setSelected(day === selected ? null : day)}
                   >
-                    <span className="stack" style={{ height: `${(total / scale) * 100}%`, animationDelay: `${i * 45}ms` }}>
+                    <span
+                      className="stack"
+                      style={{ height: `${(total / scale) * 100}%`, animationDelay: `${i * 45}ms` }}
+                    >
                       {segs.map(([d, ms]) =>
                         ms > 0 ? (
                           <span key={d || 'other'} style={{ flexGrow: ms, background: d ? ink(d) : OTHER_INK }} />
@@ -138,7 +150,12 @@ export function History({ anchor }: { anchor: string }) {
           <ol>
             {shown.map(([domain, ms], i) => {
               const limit = data.cfg.limits[domain];
-              const hits = limit ? listDays.filter((d) => (data.days[d]?.[domain] ?? 0) >= limit).length : 0;
+              // Days stored before per-day limits existed fall back to today's limits.
+              const hit = (d: string) => {
+                const max = (data.dayLimits[d] ?? data.cfg.limits)[domain];
+                return max !== undefined && (data.days[d]?.[domain] ?? 0) >= max;
+              };
+              const hits = limit ? listDays.filter(hit).length : 0;
               return (
                 <li key={domain}>
                   <span className="rank">{i + 1}</span>
@@ -159,12 +176,9 @@ export function History({ anchor }: { anchor: string }) {
           </ol>
         )}
         {rest.length > 0 && (
-          <p className="muted rest">
-            {h.rest(rest.length, formatDuration(rest.reduce((a, [, ms]) => a + ms, 0)))}
-          </p>
+          <p className="muted rest">{h.rest(rest.length, formatDuration(rest.reduce((a, [, ms]) => a + ms, 0)))}</p>
         )}
       </section>
-
     </div>
   );
 }
@@ -176,11 +190,22 @@ export function WeekStepper({ anchor, onChange }: { anchor: string; onChange: (d
   const isThisWeek = week.includes(dayKey(Date.now()));
   return (
     <div className="stepper" role="group" aria-label={s.week}>
-      <button type="button" className="btn btn-quiet" aria-label={s.prev} onClick={() => onChange(shiftWeek(anchor, -1))}>
+      <button
+        type="button"
+        className="btn btn-quiet"
+        aria-label={s.prev}
+        onClick={() => onChange(shiftWeek(anchor, -1))}
+      >
         <Chevron dir="left" />
       </button>
       <span>{isThisWeek ? s.thisWeek : weekRange(week[0]!, week[6]!)}</span>
-      <button type="button" className="btn btn-quiet" aria-label={s.next} disabled={isThisWeek} onClick={() => onChange(shiftWeek(anchor, 1))}>
+      <button
+        type="button"
+        className="btn btn-quiet"
+        aria-label={s.next}
+        disabled={isThisWeek}
+        onClick={() => onChange(shiftWeek(anchor, 1))}
+      >
         <Chevron dir="right" />
       </button>
     </div>

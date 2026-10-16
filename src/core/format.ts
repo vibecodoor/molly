@@ -1,3 +1,4 @@
+import { dateOf } from './day';
 import { getLang, t } from './i18n';
 
 /** Human duration: `45 с`, `12 мин`, `1 ч 5 мин`, `2 ч` (or `45 s`, `12 min`, `1 h 5 min`). */
@@ -65,8 +66,8 @@ const EN_NAMES: Record<string, string> = {
 export const siteName = (domain: string) => (getLang() === 'en' && EN_NAMES[domain]) || NAMES[domain] || domain;
 
 const parts = (day: string) => {
-  const [y, m, d] = day.split('-').map(Number) as [number, number, number];
-  return { date: new Date(y, m - 1, d), m, d };
+  const date = dateOf(day);
+  return { date, m: date.getMonth() + 1, d: date.getDate() };
 };
 
 export const weekdayShort = (day: string) => t().weekdays[parts(day).date.getDay()]!;

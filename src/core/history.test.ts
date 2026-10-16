@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayShort, siteName, weekRange, weekdayShort } from './format';
+import { dayShort, siteName, weekdayShort, weekRange } from './format';
 import { makeBackup, mergeDays, parseBackup, restoreLimits, shiftWeek, summarize, toCsv, weekOf } from './history';
 import { setLang } from './i18n';
 
@@ -11,7 +11,13 @@ const MIN = 60_000;
 describe('weeks', () => {
   it('runs Monday to Sunday and crosses month ends', () => {
     expect(weekOf('2026-10-15')).toEqual([
-      '2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18',
+      '2026-10-12',
+      '2026-10-13',
+      '2026-10-14',
+      '2026-10-15',
+      '2026-10-16',
+      '2026-10-17',
+      '2026-10-18',
     ]);
     expect(weekOf('2026-10-18')[0]).toBe('2026-10-12'); // Sunday belongs to the week that started Monday
     expect(weekOf('2026-11-01')[0]).toBe('2026-10-26');
@@ -35,13 +41,21 @@ describe('summarize', () => {
       weekOf('2026-10-12'),
     );
     expect(s.total).toBe(45 * MIN);
-    expect(s.ranking).toEqual([['youtube.com', 35 * MIN], ['github.com', 10 * MIN]]);
+    expect(s.ranking).toEqual([
+      ['youtube.com', 35 * MIN],
+      ['github.com', 10 * MIN],
+    ]);
     expect(s.perDay.map((d) => d.total)).toEqual([40 * MIN, 0, 5 * MIN, 0, 0, 0, 0]);
   });
   it('takes the real time from the * key, not the sum of overlapping sites', () => {
-    const s = summarize({ '2026-10-12': { 'chatgpt.com': 5 * MIN, 'yahoo.com': 5 * MIN, '*': 5 * MIN } }, ['2026-10-12']);
+    const s = summarize({ '2026-10-12': { 'chatgpt.com': 5 * MIN, 'yahoo.com': 5 * MIN, '*': 5 * MIN } }, [
+      '2026-10-12',
+    ]);
     expect(s.total).toBe(5 * MIN);
-    expect(s.ranking).toEqual([['chatgpt.com', 5 * MIN], ['yahoo.com', 5 * MIN]]);
+    expect(s.ranking).toEqual([
+      ['chatgpt.com', 5 * MIN],
+      ['yahoo.com', 5 * MIN],
+    ]);
     // the day * appeared mid-way: never below the biggest site
     expect(summarize({ d: { 'chatgpt.com': 13 * MIN, '*': 6_000 } }, ['d']).total).toBe(13 * MIN);
   });
@@ -49,9 +63,9 @@ describe('summarize', () => {
 
 describe('csv', () => {
   it('writes date,domain,seconds oldest first with CRLF', () => {
-    expect(toCsv({ '2026-10-13': { 'b.com': 1500, '*': 1500 }, '2026-10-12': { 'a.com': 61_400, 'c.com': 120_000 } })).toBe(
-      'date,domain,seconds\r\n2026-10-12,c.com,120\r\n2026-10-12,a.com,61\r\n2026-10-13,b.com,2\r\n',
-    );
+    expect(
+      toCsv({ '2026-10-13': { 'b.com': 1500, '*': 1500 }, '2026-10-12': { 'a.com': 61_400, 'c.com': 120_000 } }),
+    ).toBe('date,domain,seconds\r\n2026-10-12,c.com,120\r\n2026-10-12,a.com,61\r\n2026-10-13,b.com,2\r\n');
   });
 });
 
@@ -77,7 +91,11 @@ describe('backup', () => {
     expect(mergeDays({ '2026-10-12': { 'youtube.com': 40 * MIN, 'a.com': 1 } }, days)).toEqual({
       '2026-10-12': { 'youtube.com': 40 * MIN, 'a.com': 1 },
     });
-    const cfg = restoreLimits({ limits: { 'youtube.com': 30 * MIN }, pending: {} }, { 'youtube.com': 60 * MIN, 'twitch.tv': 20 * MIN }, '2026-10-15');
+    const cfg = restoreLimits(
+      { limits: { 'youtube.com': 30 * MIN }, pending: {} },
+      { 'youtube.com': 60 * MIN, 'twitch.tv': 20 * MIN },
+      '2026-10-15',
+    );
     expect(cfg.limits).toEqual({ 'youtube.com': 30 * MIN, 'twitch.tv': 20 * MIN });
     expect(cfg.pending['youtube.com']).toEqual({ limit: 60 * MIN, effectiveFrom: '2026-10-16' });
   });

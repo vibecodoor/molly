@@ -4,8 +4,8 @@ import { browser } from 'wxt/browser';
 import { nextMidnight } from '../../src/core/day';
 import { formatDuration, siteName } from '../../src/core/format';
 import { t } from '../../src/core/i18n';
-import { Molly } from '../../src/ui/Molly';
 import { initLang, useLang } from '../../src/ui/lang';
+import { Molly } from '../../src/ui/Molly';
 import '../../src/ui/theme.css';
 import './style.css';
 

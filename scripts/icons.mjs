@@ -11,7 +11,10 @@ mkdirSync(resolve('public/icon'), { recursive: true });
 
 for (const size of [16, 32, 48, 128]) {
   const page = join(tmpdir(), `molly-icon-${size}.html`);
-  writeFileSync(page, `<style>html,body{margin:0;background:transparent}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`);
+  writeFileSync(
+    page,
+    `<style>html,body{margin:0;background:transparent}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`,
+  );
   execFileSync(CHROME, [
     '--headless=new',
     '--hide-scrollbars',

@@ -18,7 +18,8 @@ export function useLang() {
   const [, set] = useState('');
   useEffect(() => {
     const onChange = (changes: Record<string, unknown>) => {
-      if ('lang' in changes || 'theme' in changes) void initLang().then(() => set(`${getLang()}:${document.documentElement.dataset.theme ?? ''}`));
+      if ('lang' in changes || 'theme' in changes)
+        void initLang().then(() => set(`${getLang()}:${document.documentElement.dataset.theme ?? ''}`));
     };
     browser.storage.local.onChanged.addListener(onChange);
     return () => browser.storage.local.onChanged.removeListener(onChange);
