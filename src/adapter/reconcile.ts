@@ -15,7 +15,8 @@ import {
 } from '../core/limits';
 
 const TICK_MIN = 0.5; // MAX_GAP_MS in core/engine.ts assumes this 30 s tick
-export const IDLE_INTERVAL_S = 15;
+// shortcut: the 5 min before going idle stay counted; subtract them if walk-away time shows up in History.
+export const IDLE_INTERVAL_S = 300; // no input this long = away: only tabs with sound keep counting
 
 /**
  * The single entry point for every background event: settle time, roll the day over,
@@ -38,13 +39,20 @@ export async function reconcile(now = Date.now()): Promise<void> {
   const cfg = rollover(limitConfig ?? EMPTY_CONFIG, today);
   const used = usage[today] ?? {};
   const blocked = blockedDomains(used, cfg.limits);
-  const locked = (await browser.idle.queryState(IDLE_INTERVAL_S)) === 'locked';
+  const idle = await browser.idle.queryState(IDLE_INTERVAL_S);
+  const locked = idle === 'locked';
+  const focused = await browser.windows.getLastFocused().then(
+    (w) => (w.focused ? w.id : undefined), // focused is false while another app is in front
+    () => undefined,
+  );
   const open: EngineState['open'] = {};
-  for (const tab of await browser.tabs.query({ active: true })) {
+  for (const tab of await browser.tabs.query({})) {
+    // Sound counts in any tab (a stream in the background); anything else only as the focused window's tab while the owner is at it.
+    if (!tab.audible && !(tab.active && tab.windowId === focused && idle === 'active')) continue;
     const site = domainOf(tab.url);
     const domain = site && limitFor(site, cfg.limits); // pinterest.de counts toward a pinterest.com limit
     // A blocked site still loads under the overlay; time behind the overlay isn't time on the site.
-    if (domain && !blocked.includes(domain)) open[tab.windowId] = domain;
+    if (domain && !blocked.includes(domain) && tab.id !== undefined) open[tab.id] = domain;
   }
 
   await browser.storage.local.set({

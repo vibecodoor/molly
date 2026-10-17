@@ -4,7 +4,7 @@ import { dayKey, nextMidnight } from './day';
 export type Usage = Record<string, Record<string, number>>;
 
 export interface EngineState {
-  /** windowId → domain of that window's active tab (non-http tabs are left out). */
+  /** tabId → domain of each counted tab: the focused window's active tab, plus any tab playing sound (non-http left out). */
   open: Record<string, string>;
   /** Start of the unsettled interval; null while paused (screen locked). */
   since: number | null;

@@ -25,15 +25,25 @@ export default defineBackground(() => {
   browser.idle.setDetectionInterval(IDLE_INTERVAL_S);
   browser.runtime.onStartup.addListener(run);
   browser.runtime.onInstalled.addListener(run);
+  // After a reload or update, open tabs keep the old guard with a dead API (it can't see the limit run out):
+  // give each one a live guard. Not on chrome_update: those tabs already run the current guard.
+  browser.runtime.onInstalled.addListener(async ({ reason }) => {
+    if (reason !== 'install' && reason !== 'update') return;
+    for (const tab of await browser.tabs.query({ url: ['http://*/*', 'https://*/*'] }))
+      browser.scripting
+        .executeScript({ target: { tabId: tab.id! }, files: ['/content-scripts/guard.js'] })
+        .catch(() => {}); // discarded tabs, the Web Store: they load a fresh guard when opened
+  });
   browser.tabs.onActivated.addListener(run);
-  browser.tabs.onUpdated.addListener((_id, info) => info.url && run());
+  browser.tabs.onUpdated.addListener((_id, info) => (info.url || info.audible !== undefined) && run());
   browser.tabs.onRemoved.addListener(run);
   browser.tabs.onAttached.addListener(run);
   browser.tabs.onDetached.addListener(run);
   browser.tabs.onReplaced.addListener(run);
   browser.windows.onRemoved.addListener(run);
+  browser.windows.onFocusChanged.addListener(run);
   browser.alarms.onAlarm.addListener(run);
-  browser.idle.onStateChanged.addListener(run); // locked → paused, anything else → resumed (in reconcile)
+  browser.idle.onStateChanged.addListener(run); // locked → paused, idle → sound only, active → all (in reconcile)
 
   // Writes from extension pages go through the same queue, then re-apply blocks at once.
   browser.runtime.onMessage.addListener(

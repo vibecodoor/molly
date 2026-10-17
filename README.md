@@ -20,7 +20,7 @@
 
 When a site's limit runs out, Molly doesn't swap the page for a dull "blocked" screen. The site stays loaded but sits behind frosted glass and barrier tape, sound and video pause, and a countdown shows when it opens again. There is no "just five more minutes" button.
 
-- **Honest numbers.** Time counts only while a site is the active tab in its window, so a tab left open in the background doesn't count.
+- **Honest numbers.** A site counts while it's the tab you're looking at in the focused Chrome window, or while it plays sound (a stream in the background counts). A tab left open and silent doesn't.
 - **Limits that stick.** Lowering a limit works right away. Raising or removing one waits until tomorrow, so you can't negotiate with yourself mid-video.
 - **A week at a glance.** Daily bars, a ranked list of sites, how often each limit ran out, plus CSV export and JSON backups.
 - **Private by design.** No account, no servers, no analytics. Everything stays in `chrome.storage` on your machine.
@@ -98,8 +98,10 @@ Your history and limits stay. Don't click **Remove**: removing the extension del
 
 ## How it counts
 
-- A site's time counts while its tab is the active tab in any window, even if the window is in the background or minimized. One site open in two windows counts once.
-- Counting pauses while the screen is locked. A sleeping laptop adds no time.
+- A site counts while its tab is the active tab of the focused Chrome window. When another app is in front, it stops.
+- A tab playing sound counts anywhere: a background tab, another window, a minimized window. A muted video doesn't.
+- After 5 minutes with no mouse or keyboard input, only tabs with sound keep counting.
+- One site open in several tabs counts once. Counting pauses while the screen is locked. A sleeping laptop adds no time.
 - A limit covers subdomains and the same name on other domains: limiting `youtube.com` also covers `m.youtube.com` and `youtube.de`.
 - Days run from local midnight to midnight. That's when blocks lift and pending limit raises take effect.
 - No time is counted on a site while it's blocked.
